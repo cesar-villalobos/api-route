@@ -1,0 +1,13 @@
+loc_start;loc_end;time
+A;B;5
+A;C;12
+B;D;10
+C;D;3
+C;E;15
+D;E;4
+B;F;20
+F;E;2
+E;G;8
+D;G;25
+B;C;2
+G;F;1
