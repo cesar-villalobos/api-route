@@ -95,15 +95,17 @@ public class RouteService {
 
         // 3. Reconstrucción de la ruta y preparación de la respuesta
         List<String> fastestRoute = new ArrayList<>();
-        int totalTime = times.getOrDefault(destinationLocation, -1);
+        int totalTime = times.getOrDefault(destinationLocation, Integer.MAX_VALUE);
 
-        if (totalTime != -1) {
+        if (totalTime != Integer.MAX_VALUE) {
             Location step = destinationLocation;
             while (step != null) {
                 fastestRoute.add(step.getName());
                 step = predecessors.get(step);
             }
             Collections.reverse(fastestRoute);
+        } else {
+            totalTime = -1; // No se encontró una ruta
         }
 
         return new RouteResponse(fastestRoute, totalTime);
