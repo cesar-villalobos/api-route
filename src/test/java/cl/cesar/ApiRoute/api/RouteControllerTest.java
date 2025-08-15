@@ -2,7 +2,6 @@ package cl.cesar.ApiRoute.api;
 
 import cl.cesar.ApiRoute.service.RouteService;
 
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -78,7 +77,7 @@ public class RouteControllerTest {
         // Configuramos el mock para lanzar una excepción de E/S
         doThrow(new IOException("Error de prueba")).when(routeService).loadData(any());
 
-        mockMvc.perform(multipart("/api/routes/load").file(file))
+        mockMvc.perform(multipart("/api/routes/load").file(file).with(csrf()))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().string("Error al procesar el archivo CSV: Error de prueba"));
     }
@@ -97,9 +96,9 @@ public class RouteControllerTest {
                 .param("destination", "R20")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.route").isArray())
-                .andExpect(jsonPath("$.route[0]").value("CP1"))
-                .andExpect(jsonPath("$.totalTime").value(74));
+                .andExpect(jsonPath("$.ruta").isArray())
+                .andExpect(jsonPath("$.ruta[0]").value("CP1"))
+                .andExpect(jsonPath("$.tiempoTotal").value(74));
 
         // Verificamos que el método del servicio fue llamado con los parámetros correctos
         verify(routeService, times(1)).findFastestRoute("CP1", "R20");
@@ -117,6 +116,6 @@ public class RouteControllerTest {
                 .param("destination", "NonExistent")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.totalTime").value(-1));
+                .andExpect(jsonPath("$.tiempoTotal").value(-1));
     }
 }
