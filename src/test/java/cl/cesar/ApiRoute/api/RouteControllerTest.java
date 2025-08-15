@@ -1,7 +1,5 @@
 package cl.cesar.ApiRoute.api;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import cl.cesar.ApiRoute.service.RouteService;
 
 import org.junit.jupiter.api.Test;
@@ -10,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -17,10 +16,12 @@ import java.io.IOException;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(RouteController.class)
+@WithMockUser
 public class RouteControllerTest {
 
     @Autowired
@@ -29,8 +30,6 @@ public class RouteControllerTest {
     @MockBean
     private RouteService routeService;
 
-    @Autowired
-    private ObjectMapper objectMapper; // Utilizado para convertir objetos a JSON
 
     // --- Pruebas para el endpoint POST /api/routes/load ---
 
@@ -46,7 +45,7 @@ public class RouteControllerTest {
         // Configuramos el mock para no hacer nada cuando se llama a loadData
         doNothing().when(routeService).loadData(any());
 
-        mockMvc.perform(multipart("/api/routes/load").file(file))
+        mockMvc.perform(multipart("/api/routes/load").file(file).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Datos de rutas cargados correctamente."));
 
@@ -58,7 +57,7 @@ public class RouteControllerTest {
     void testLoadData_EmptyFile() throws Exception {
         MockMultipartFile emptyFile = new MockMultipartFile("file", "empty.csv", MediaType.TEXT_PLAIN_VALUE, new byte[0]);
 
-        mockMvc.perform(multipart("/api/routes/load").file(emptyFile))
+        mockMvc.perform(multipart("/api/routes/load").file(emptyFile).with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Por favor, selecciona un archivo para cargar."));
 
@@ -78,7 +77,7 @@ public class RouteControllerTest {
         // Configuramos el mock para lanzar una excepción de E/S
         doThrow(new IOException("Error de prueba")).when(routeService).loadData(any());
 
-        mockMvc.perform(multipart("/api/routes/load").file(file))
+        mockMvc.perform(multipart("/api/routes/load").file(file).with(csrf()))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().string("Error al procesar el archivo CSV: Error de prueba"));
     }
@@ -97,9 +96,9 @@ public class RouteControllerTest {
                 .param("destination", "R20")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.route").isArray())
-                .andExpect(jsonPath("$.route[0]").value("CP1"))
-                .andExpect(jsonPath("$.totalTime").value(74));
+                .andExpect(jsonPath("$.ruta").isArray())
+                .andExpect(jsonPath("$.ruta[0]").value("CP1"))
+                .andExpect(jsonPath("$.tiempoTotal").value(74));
 
         // Verificamos que el método del servicio fue llamado con los parámetros correctos
         verify(routeService, times(1)).findFastestRoute("CP1", "R20");
@@ -117,6 +116,6 @@ public class RouteControllerTest {
                 .param("destination", "NonExistent")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.totalTime").value(-1));
+                .andExpect(jsonPath("$.tiempoTotal").value(-1));
     }
 }

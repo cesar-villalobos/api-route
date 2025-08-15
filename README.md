@@ -57,7 +57,7 @@ cd api-route
 
 La aplicación estará disponible en `http://localhost:8080`
 
-### Usando Docker
+### Usando Docker (Recomendado)
 
 1. **Construir la imagen**
 ```bash
