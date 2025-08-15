@@ -73,7 +73,7 @@ public class RouteService {
         times.put(originLocation, 0);
         priorityQueue.add(new NodeWithTime(originLocation, 0));
 
-        // 2. Bucle principal de Dijkstra
+        // 2. Ciclo principal de Dijkstra
         while (!priorityQueue.isEmpty()) {
             Location currentLocation = priorityQueue.poll().getLocation();
 
